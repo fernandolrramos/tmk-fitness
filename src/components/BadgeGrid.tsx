@@ -10,7 +10,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { useLanguage } from '@/context/LanguageContext'
-import { badges } from '@/data/social'
+import { useEngagement } from '@/context/EngagementContext'
 
 const ICONS: Record<string, LucideIcon> = {
   Sparkles,
@@ -24,6 +24,7 @@ const ICONS: Record<string, LucideIcon> = {
 /** Achievement badges grid — earned in colour, locked greyed with progress. */
 export function BadgeGrid() {
   const { tc } = useLanguage()
+  const { badges } = useEngagement()
 
   return (
     <div className="grid grid-cols-3 gap-3">

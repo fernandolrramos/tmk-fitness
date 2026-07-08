@@ -1,36 +1,19 @@
 import { motion } from 'framer-motion'
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { CalendarCheck, CalendarDays, Check, type LucideIcon } from 'lucide-react'
 import { useLanguage } from '@/context/LanguageContext'
 import { useBooking } from '@/context/BookingContext'
 import { classById } from '@/data/classes'
-import { timetable } from '@/data/timetable'
-import { nextOccurrence, formatRelativeDay, formatTime } from '@/lib/dates'
+import { formatRelativeDay, formatTime } from '@/lib/dates'
 import type { DatedSession } from '@/types'
 
 type Tab = 'upcoming' | 'past'
 
-/** Build a handful of plausible past (completed) sessions from the timetable. */
-function pastSessions(): DatedSession[] {
-  const now = new Date()
-  const picks = timetable.slice(0, 4)
-  return picks
-    .map((s, i) => {
-      const base = nextOccurrence(s, now)
-      const date = new Date(base)
-      date.setDate(date.getDate() - (i + 1) * 7)
-      return { ...s, date: date.toISOString() } as DatedSession
-    })
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-}
-
 export function Bookings() {
   const { t } = useLanguage()
-  const { upcoming, cancel } = useBooking()
+  const { upcoming, toCheckIn, attended, cancel, checkIn } = useBooking()
   const [tab, setTab] = useState<Tab>('upcoming')
-
-  const past = useMemo(() => pastSessions(), [])
 
   return (
     <motion.div
@@ -59,7 +42,7 @@ export function Bookings() {
       </div>
 
       {tab === 'upcoming' ? (
-        upcoming.length === 0 ? (
+        toCheckIn.length + upcoming.length === 0 ? (
           <EmptyState
             icon={CalendarDays}
             message={t('bookings.empty')}
@@ -67,21 +50,29 @@ export function Bookings() {
           />
         ) : (
           <div className="space-y-3">
-            {upcoming.map((s, i) => (
+            {toCheckIn.map((s, i) => (
               <BookingCard
                 key={s.id + s.date}
                 session={s}
                 index={i}
+                onCheckIn={() => checkIn(s.id, s.date)}
+              />
+            ))}
+            {upcoming.map((s, i) => (
+              <BookingCard
+                key={s.id + s.date}
+                session={s}
+                index={toCheckIn.length + i}
                 onCancel={() => cancel(s.id, s.date)}
               />
             ))}
           </div>
         )
-      ) : past.length === 0 ? (
+      ) : attended.length === 0 ? (
         <EmptyState icon={CalendarCheck} message={t('bookings.emptyPast')} />
       ) : (
         <div className="space-y-3">
-          {past.map((s, i) => (
+          {attended.map((s, i) => (
             <BookingCard key={s.id + s.date} session={s} index={i} completed />
           ))}
         </div>
@@ -94,11 +85,13 @@ function BookingCard({
   session,
   index,
   onCancel,
+  onCheckIn,
   completed,
 }: {
   session: DatedSession
   index: number
   onCancel?: () => void
+  onCheckIn?: () => void
   completed?: boolean
 }) {
   const { t, tc, lang } = useLanguage()
@@ -134,7 +127,17 @@ function BookingCard({
           <p className="text-xs text-slate-400">{session.instructor}</p>
         </div>
 
-        {!completed && onCancel && (
+        {onCheckIn && (
+          <button
+            type="button"
+            onClick={onCheckIn}
+            className="shrink-0 rounded-xl bg-primary px-3 py-2 font-heading text-xs font-semibold uppercase tracking-wide text-white transition-opacity hover:opacity-90"
+          >
+            {t('bookings.checkIn')}
+          </button>
+        )}
+
+        {!completed && !onCheckIn && onCancel && (
           <button
             type="button"
             onClick={onCancel}

@@ -197,6 +197,17 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
       setBookingsState((prev) =>
         prev.map((b) => (b.id === bookingId ? { ...b, checkedIn: nextVal } : b)),
       )
+      // Mirror the trigger's stat change locally so KPIs/leaderboard move live.
+      const delta = nextVal ? 1 : -1
+      setMembersState((prev) => {
+        const next = prev.map((m) =>
+          m.id === current.memberId
+            ? { ...m, sessionsThisMonth: Math.max(0, m.sessionsThisMonth + delta) }
+            : m,
+        )
+        setMemberRecords(next)
+        return next
+      })
       void supabase
         .from('bookings')
         .update({ checked_in: nextVal })

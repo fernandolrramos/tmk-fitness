@@ -5,7 +5,7 @@ import { useLanguage } from '@/context/LanguageContext'
 import { useAuth } from '@/context/AuthContext'
 import { useEngagement, type FeedItem } from '@/context/EngagementContext'
 import { ShareSheet } from '@/components/ShareSheet'
-import { challenge, streak } from '@/data/social'
+import { challenge } from '@/data/social'
 import { memberRecords } from '@/data/members'
 import { classById } from '@/data/classes'
 import { leaderboard } from '@/lib/social'
@@ -25,6 +25,7 @@ export function Community() {
     yourContribution,
     challengeCurrent,
     challengeParticipants,
+    streak,
   } = useEngagement()
 
   const [shareOpen, setShareOpen] = useState(false)

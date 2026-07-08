@@ -1,14 +1,19 @@
-import type { ActivityEvent, Badge, Challenge, StreakInfo } from '@/types'
+import type { ActivityEvent, Challenge, Localized } from '@/types'
 
 /** The demo member's gym buddies (subset of memberRecords). */
 export const buddyIds = ['m-jonas', 'm-ingrid', 'm-erik', 'm-thea', 'm-henrik', 'm-ole']
 
-/** Sara's current streak. */
-export const streak: StreakInfo = {
-  current: 3,
-  best: 6,
-  // Mon…Sun — trained Mon/Tue/Thu/Sat so far this week
-  week: [true, true, false, true, false, true, false],
+/** What real metric a badge tracks. Progress/earned are computed live. */
+export type BadgeMetric = 'firstSession' | 'sessions' | 'streak' | 'morning' | 'spin' | 'cheers'
+
+export interface BadgeDef {
+  id: string
+  name: Localized
+  description: Localized
+  /** lucide icon name. */
+  icon: string
+  metric: BadgeMetric
+  target: number
 }
 
 /** The live gym-wide challenge everyone contributes to. */
@@ -40,54 +45,58 @@ export const challenge: Challenge = {
   ],
 }
 
-/** Achievement badges for the demo member. */
-export const badges: Badge[] = [
+/**
+ * Achievement badge definitions. `earned`/`progress` are computed live in
+ * EngagementContext from real data (check-ins, streak, cheers given).
+ */
+export const badgeDefs: BadgeDef[] = [
   {
     id: 'b-first',
     name: { no: 'Første økt', en: 'First session' },
     description: { no: 'Du er i gang!', en: "You're underway!" },
     icon: 'Sparkles',
-    earned: true,
+    metric: 'firstSession',
+    target: 1,
   },
   {
     id: 'b-early',
     name: { no: 'Tidligfugl', en: 'Early bird' },
-    description: {
-      no: '5 morgentimer fullført',
-      en: '5 morning classes completed',
-    },
+    description: { no: '5 morgentimer', en: '5 morning classes' },
     icon: 'Sunrise',
-    earned: true,
+    metric: 'morning',
+    target: 5,
   },
   {
     id: 'b-streak',
     name: { no: 'Trofast', en: 'Consistent' },
     description: { no: '3 uker på rad', en: '3 weeks in a row' },
     icon: 'Flame',
-    earned: true,
+    metric: 'streak',
+    target: 3,
   },
   {
     id: 'b-social',
     name: { no: 'Heiagjeng', en: 'Cheerleader' },
-    description: { no: 'Heiet på 10 venner', en: 'Cheered 10 friends' },
+    description: { no: 'Heiet på 5 venner', en: 'Cheered 5 friends' },
     icon: 'HandHeart',
-    earned: true,
+    metric: 'cheers',
+    target: 5,
   },
   {
     id: 'b-25',
     name: { no: '25 økter', en: '25 sessions' },
     description: { no: 'Kvart hundre unnagjort', en: 'A quarter-century done' },
     icon: 'Medal',
-    earned: false,
-    progress: { value: 12, target: 25 },
+    metric: 'sessions',
+    target: 25,
   },
   {
     id: 'b-spin',
     name: { no: 'Spinnkonge', en: 'Spin royalty' },
     description: { no: '15 spinningtimer', en: '15 spin classes' },
     icon: 'Bike',
-    earned: false,
-    progress: { value: 8, target: 15 },
+    metric: 'spin',
+    target: 15,
   },
 ]
 

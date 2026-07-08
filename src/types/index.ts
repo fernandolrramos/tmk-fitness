@@ -86,6 +86,9 @@ export interface Member {
   planId: string
   sessionsThisMonth: number
   sessionsGoal: number
+  /** Consecutive active weeks (live, from check-ins). */
+  streakCurrent: number
+  streakBest: number
 }
 
 /** A booking = the id of a dated session the member has confirmed. */

@@ -9,13 +9,30 @@ import {
 } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/context/AuthContext'
+import { useBooking } from '@/context/BookingContext'
 import { toFeedItem } from '@/lib/mappers'
-import { challenge } from '@/data/social'
-import type { ActivityEvent } from '@/types'
+import { challenge, badgeDefs, type BadgeMetric } from '@/data/social'
+import type { ActivityEvent, Badge, StreakInfo } from '@/types'
 
 /** An activity event enriched with the viewer's cheer state. */
 export interface FeedItem extends ActivityEvent {
   cheeredByMe: boolean
+}
+
+/** Mon…Sun activity for the current week, derived from checked-in sessions. */
+function weekActivity(attendedDates: string[]): boolean[] {
+  const week = Array<boolean>(7).fill(false)
+  const now = new Date()
+  const monday = new Date(now)
+  monday.setDate(now.getDate() - ((now.getDay() + 6) % 7))
+  monday.setHours(0, 0, 0, 0)
+  const nextMon = new Date(monday)
+  nextMon.setDate(monday.getDate() + 7)
+  for (const iso of attendedDates) {
+    const d = new Date(iso)
+    if (d >= monday && d < nextMon) week[(d.getDay() + 6) % 7] = true
+  }
+  return week
 }
 
 interface EngagementValue {
@@ -28,6 +45,11 @@ interface EngagementValue {
   yourContribution: number
   challengeCurrent: number
   challengeParticipants: number
+
+  /** Live weekly streak (current/best from members, week dots from check-ins). */
+  streak: StreakInfo
+  /** Achievement badges with earned/progress computed from real data. */
+  badges: Badge[]
 }
 
 const EngagementContext = createContext<EngagementValue | null>(null)
@@ -36,6 +58,7 @@ const CHALLENGE_ID = challenge.id
 
 export function EngagementProvider({ children }: { children: ReactNode }) {
   const { isAuthed, member } = useAuth()
+  const { attended } = useBooking()
   const memberId = member.id
   const [ready, setReady] = useState(false)
   const [feed, setFeed] = useState<FeedItem[]>([])
@@ -94,6 +117,49 @@ export function EngagementProvider({ children }: { children: ReactNode }) {
 
   const yourContribution = member.sessionsThisMonth
 
+  const streak = useMemo<StreakInfo>(
+    () => ({
+      current: member.streakCurrent,
+      best: member.streakBest,
+      week: weekActivity(attended.map((s) => s.date)),
+    }),
+    [member.streakCurrent, member.streakBest, attended],
+  )
+
+  const badges = useMemo<Badge[]>(() => {
+    const sessions = member.sessionsThisMonth
+    const morning = attended.filter((s) => s.start < '12:00').length
+    const spin = attended.filter((s) => s.classId === 'spinning').length
+    const cheersGiven = feed.filter((f) => f.cheeredByMe).length
+    const valueFor = (m: BadgeMetric): number => {
+      switch (m) {
+        case 'firstSession':
+        case 'sessions':
+          return sessions
+        case 'streak':
+          return member.streakCurrent
+        case 'morning':
+          return morning
+        case 'spin':
+          return spin
+        case 'cheers':
+          return cheersGiven
+      }
+    }
+    return badgeDefs.map((d) => {
+      const v = valueFor(d.metric)
+      const earned = v >= d.target
+      return {
+        id: d.id,
+        name: d.name,
+        description: d.description,
+        icon: d.icon,
+        earned,
+        progress: earned ? undefined : { value: Math.min(v, d.target), target: d.target },
+      }
+    })
+  }, [member.sessionsThisMonth, member.streakCurrent, attended, feed])
+
   const value = useMemo<EngagementValue>(
     () => ({
       ready,
@@ -104,8 +170,20 @@ export function EngagementProvider({ children }: { children: ReactNode }) {
       yourContribution,
       challengeCurrent: challenge.current + (challengeJoined ? yourContribution : 0),
       challengeParticipants: participantCount,
+      streak,
+      badges,
     }),
-    [ready, feed, cheer, challengeJoined, joinChallenge, yourContribution, participantCount],
+    [
+      ready,
+      feed,
+      cheer,
+      challengeJoined,
+      joinChallenge,
+      yourContribution,
+      participantCount,
+      streak,
+      badges,
+    ],
   )
 
   return (

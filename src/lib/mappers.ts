@@ -108,6 +108,8 @@ export const toMember = (r: Row<'members'>): Member => ({
   planId: r.plan_id,
   sessionsThisMonth: r.sessions_this_month,
   sessionsGoal: r.sessions_goal,
+  streakCurrent: r.streak_current,
+  streakBest: r.streak_best,
 })
 
 export const toBooking = (r: Row<'bookings'>): Booking => ({

@@ -156,6 +156,9 @@ export type Database = {
           sessions_goal: number
           sessions_this_month: number
           status: string
+          streak_best: number
+          streak_current: number
+          streak_week: string | null
         }
         Insert: {
           avatar: string
@@ -171,6 +174,9 @@ export type Database = {
           sessions_goal?: number
           sessions_this_month?: number
           status?: string
+          streak_best?: number
+          streak_current?: number
+          streak_week?: string | null
         }
         Update: {
           avatar?: string
@@ -186,6 +192,9 @@ export type Database = {
           sessions_goal?: number
           sessions_this_month?: number
           status?: string
+          streak_best?: number
+          streak_current?: number
+          streak_week?: string | null
         }
         Relationships: []
       }

@@ -28,6 +28,8 @@ interface AuthContextValue {
   login: (email: string, password: string) => Promise<Role>
   logout: () => Promise<void>
   updateMember: (patch: Partial<Member>) => void
+  /** Re-fetch the member row from the DB (e.g. after a check-in bumps stats). */
+  refreshMember: () => void
 }
 
 /** Neutral member used before hydration / for admin accounts (no member row). */
@@ -41,6 +43,8 @@ const PLACEHOLDER_MEMBER: Member = {
   planId: '',
   sessionsThisMonth: 0,
   sessionsGoal: 0,
+  streakCurrent: 0,
+  streakBest: 0,
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
@@ -54,6 +58,7 @@ function patchToRow(p: Partial<Member>): MemberUpdate {
   if (p.dialCode !== undefined) row.dial_code = p.dialCode
   if (p.planId !== undefined) row.plan_id = p.planId
   if (p.photo !== undefined) row.photo = p.photo
+  if (p.sessionsGoal !== undefined) row.sessions_goal = p.sessionsGoal
   return row
 }
 
@@ -147,6 +152,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [member.id],
   )
 
+  const refreshMember = useCallback(() => {
+    const id = member.id
+    if (!id) return
+    void supabase
+      .from('members')
+      .select('*')
+      .eq('id', id)
+      .single()
+      .then(({ data }) => {
+        if (data) setMember(toMember(data))
+      })
+  }, [member.id])
+
   const value = useMemo<AuthContextValue>(
     () => ({
       authReady,
@@ -156,8 +174,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       login,
       logout,
       updateMember,
+      refreshMember,
     }),
-    [authReady, role, member, login, logout, updateMember],
+    [authReady, role, member, login, logout, updateMember, refreshMember],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

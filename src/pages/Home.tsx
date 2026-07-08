@@ -12,10 +12,10 @@ import {
 import { useLanguage } from '@/context/LanguageContext'
 import { useAuth } from '@/context/AuthContext'
 import { useBooking } from '@/context/BookingContext'
+import { useEngagement } from '@/context/EngagementContext'
 import { classById } from '@/data/classes'
 import { planById } from '@/data/plans'
 import { quoteOfTheDay } from '@/data/quotes'
-import { streak } from '@/data/social'
 import { Countdown } from '@/components/Countdown'
 import { formatRelativeDay, formatTime } from '@/lib/dates'
 import type { DatedSession } from '@/types'
@@ -44,6 +44,7 @@ export function Home() {
   const { t, tc } = useLanguage()
   const { member } = useAuth()
   const { next, upcoming } = useBooking()
+  const { streak } = useEngagement()
   const navigate = useNavigate()
 
   const plan = planById(member.planId)

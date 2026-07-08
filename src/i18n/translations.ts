@@ -87,6 +87,9 @@ export const translations = {
     'profile.changePlan': 'Bytt plan',
     'profile.planExternalHint': 'Endre eller oppgrader medlemskapet via TMK sin innmelding.',
     'profile.goals': 'Månedens mål',
+    'profile.monthlyGoal': 'Mål',
+    'profile.goalDown': 'Reduser mål',
+    'profile.goalUp': 'Øk mål',
     'profile.sessionsOf': 'av',
     'profile.sessions': 'økter',
     'profile.thisMonth': 'denne måneden',
@@ -157,6 +160,7 @@ export const translations = {
     'bookings.emptyPast': 'Ingen tidligere timer ennå.',
     'bookings.browse': 'Se timeplan',
     'bookings.completed': 'Fullført',
+    'bookings.checkIn': 'Sjekk inn',
 
     // treatment
     'treatment.title': 'Behandling & PT',
@@ -458,6 +462,9 @@ export const translations = {
     'profile.changePlan': 'Change plan',
     'profile.planExternalHint': "Change or upgrade your membership via TMK's online sign-up.",
     'profile.goals': "This month's goal",
+    'profile.monthlyGoal': 'Goal',
+    'profile.goalDown': 'Decrease goal',
+    'profile.goalUp': 'Increase goal',
     'profile.sessionsOf': 'of',
     'profile.sessions': 'sessions',
     'profile.thisMonth': 'this month',
@@ -528,6 +535,7 @@ export const translations = {
     'bookings.emptyPast': 'No past classes yet.',
     'bookings.browse': 'Browse schedule',
     'bookings.completed': 'Completed',
+    'bookings.checkIn': 'Check in',
 
     // treatment
     'treatment.title': 'Treatment & PT',

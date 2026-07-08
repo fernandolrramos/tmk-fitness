@@ -1,11 +1,12 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Camera, Check, Copy, ExternalLink, Flame, Gift, Share2, UserPlus } from 'lucide-react'
+import { Camera, Check, Copy, ExternalLink, Flame, Gift, Minus, Plus, Share2, UserPlus } from 'lucide-react'
 import { useLanguage } from '@/context/LanguageContext'
 import { useAuth } from '@/context/AuthContext'
+import { useEngagement } from '@/context/EngagementContext'
 import { plans, planById } from '@/data/plans'
-import { streak, referralCode } from '@/data/social'
+import { referralCode } from '@/data/social'
 import { LanguageToggle } from '@/components/LanguageToggle'
 import { DialCodePicker } from '@/components/DialCodePicker'
 import { ProgressRing } from '@/components/ProgressRing'
@@ -20,7 +21,11 @@ const ENROLL_URL = 'https://tmkfitness.ibooking.no/nettinnmelding'
 export function Profile() {
   const { t, tc, lang } = useLanguage()
   const { member, updateMember, logout } = useAuth()
+  const { streak } = useEngagement()
   const navigate = useNavigate()
+
+  const setGoal = (delta: number) =>
+    updateMember({ sessionsGoal: Math.min(50, Math.max(1, member.sessionsGoal + delta)) })
 
   const [draft, setDraft] = useState<Member>(member)
   const [saved, setSaved] = useState(false)
@@ -127,6 +132,30 @@ export function Profile() {
             <Flame className="h-3.5 w-3.5 fill-current" />
             {streak.current} {t(streak.current === 1 ? 'streak.week' : 'streak.weeks')}
           </span>
+          <div className="mt-3 flex items-center gap-2">
+            <span className="text-xs font-medium uppercase tracking-wide text-slate-400">
+              {t('profile.monthlyGoal')}
+            </span>
+            <button
+              type="button"
+              onClick={() => setGoal(-1)}
+              aria-label={t('profile.goalDown')}
+              className="flex h-7 w-7 items-center justify-center rounded-full border border-slate-200 text-slate-500 transition-colors hover:border-primary hover:text-primary"
+            >
+              <Minus className="h-4 w-4" />
+            </button>
+            <span className="w-6 text-center font-heading text-lg font-bold tabular-nums text-secondary">
+              {member.sessionsGoal}
+            </span>
+            <button
+              type="button"
+              onClick={() => setGoal(1)}
+              aria-label={t('profile.goalUp')}
+              className="flex h-7 w-7 items-center justify-center rounded-full border border-slate-200 text-slate-500 transition-colors hover:border-primary hover:text-primary"
+            >
+              <Plus className="h-4 w-4" />
+            </button>
+          </div>
         </div>
       </section>
 
