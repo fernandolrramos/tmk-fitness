@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Camera, Check, Copy, Flame, Gift, Share2, UserPlus } from 'lucide-react'
+import { Camera, Check, Copy, ExternalLink, Flame, Gift, Share2, UserPlus } from 'lucide-react'
 import { useLanguage } from '@/context/LanguageContext'
 import { useAuth } from '@/context/AuthContext'
 import { plans, planById } from '@/data/plans'
@@ -13,6 +13,9 @@ import { BadgeGrid } from '@/components/BadgeGrid'
 import { ShareSheet } from '@/components/ShareSheet'
 import { readAndResizeImage } from '@/lib/image'
 import type { Member } from '@/types'
+
+/** TMK's real online enrolment / membership-change page. */
+const ENROLL_URL = 'https://tmkfitness.ibooking.no/nettinnmelding'
 
 export function Profile() {
   const { t, tc, lang } = useLanguage()
@@ -60,7 +63,7 @@ export function Profile() {
     window.setTimeout(() => setSaved(false), 1800)
   }
 
-  const plan = planById(draft.planId)
+  const plan = planById(member.planId)
 
   return (
     <motion.div
@@ -200,23 +203,26 @@ export function Profile() {
         </div>
         <div className="grid grid-cols-2 gap-2">
           {plans.map((p) => (
-            <button
+            <a
               key={p.id}
-              type="button"
-              onClick={() => set({ planId: p.id })}
+              href={ENROLL_URL}
+              target="_blank"
+              rel="noopener noreferrer"
               className={`rounded-xl border p-3 text-left text-sm transition-colors ${
-                draft.planId === p.id
+                member.planId === p.id
                   ? 'border-primary bg-primary/5'
-                  : 'border-slate-200 bg-white'
+                  : 'border-slate-200 bg-white hover:border-primary/40'
               }`}
             >
-              <span className="font-heading font-semibold uppercase text-secondary">
+              <span className="flex items-center gap-1 font-heading font-semibold uppercase text-secondary">
                 {tc(p.name)}
+                <ExternalLink className="h-3 w-3 shrink-0 text-slate-400" />
               </span>
               <span className="mt-0.5 block text-xs text-slate-500">{tc(p.price)}</span>
-            </button>
+            </a>
           ))}
         </div>
+        <p className="text-xs text-slate-400">{t('profile.planExternalHint')}</p>
       </section>
 
       {/* Language */}

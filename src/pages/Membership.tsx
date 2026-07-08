@@ -1,10 +1,12 @@
 import { motion } from 'framer-motion'
-import { useState } from 'react'
-import { Check, Star } from 'lucide-react'
+import { Check, ExternalLink, Star } from 'lucide-react'
 import { useLanguage } from '@/context/LanguageContext'
 import { useAuth } from '@/context/AuthContext'
 import { plans, planById } from '@/data/plans'
 import type { TranslationKey } from '@/i18n/translations'
+
+/** TMK's real online enrolment / membership-change page. */
+const ENROLL_URL = 'https://tmkfitness.ibooking.no/nettinnmelding'
 
 const PERK_KEYS: TranslationKey[] = [
   'membership.perk1',
@@ -15,7 +17,6 @@ const PERK_KEYS: TranslationKey[] = [
 export function Membership() {
   const { t, tc } = useLanguage()
   const { member } = useAuth()
-  const [selected, setSelected] = useState<string>(member.planId)
 
   const current = planById(member.planId)
 
@@ -68,18 +69,16 @@ export function Membership() {
         <div className="space-y-3">
           {plans.map((plan, i) => {
             const isCurrent = plan.id === member.planId
-            const isSelected = plan.id === selected
             return (
-              <motion.button
+              <motion.a
                 key={plan.id}
-                type="button"
+                href={ENROLL_URL}
+                target="_blank"
+                rel="noopener noreferrer"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.05 }}
-                onClick={() => setSelected(plan.id)}
-                className={`tmk-card flex w-full items-center justify-between gap-3 p-4 text-left transition-colors ${
-                  isSelected ? 'ring-2 ring-primary' : ''
-                }`}
+                className="tmk-card flex w-full items-center justify-between gap-3 p-4 text-left transition-colors"
               >
                 <div>
                   <div className="flex items-center gap-2">
@@ -97,19 +96,14 @@ export function Membership() {
                   <p className="text-xs text-slate-400">{tc(plan.terms)}</p>
                 </div>
                 <span
-                  className={`shrink-0 rounded-full px-3 py-1 font-heading text-xs font-semibold uppercase tracking-wide ${
-                    isCurrent
-                      ? 'bg-primary/10 text-primary'
-                      : 'bg-secondary text-white'
+                  className={`flex shrink-0 items-center gap-1 rounded-full px-3 py-1 font-heading text-xs font-semibold uppercase tracking-wide ${
+                    isCurrent ? 'bg-primary/10 text-primary' : 'bg-secondary text-white'
                   }`}
                 >
-                  {isCurrent
-                    ? isSelected
-                      ? t('membership.selected')
-                      : t('membership.current')
-                    : t('membership.upgrade')}
+                  {isCurrent ? t('membership.current') : t('membership.upgrade')}
+                  {!isCurrent && <ExternalLink className="h-3 w-3" />}
                 </span>
-              </motion.button>
+              </motion.a>
             )
           })}
         </div>

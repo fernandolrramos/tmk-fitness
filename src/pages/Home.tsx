@@ -16,9 +16,7 @@ import { classById } from '@/data/classes'
 import { planById } from '@/data/plans'
 import { quoteOfTheDay } from '@/data/quotes'
 import { streak } from '@/data/social'
-import { nextBuddyClass } from '@/lib/social'
 import { Countdown } from '@/components/Countdown'
-import { AvatarStack } from '@/components/ui/Avatar'
 import { formatRelativeDay, formatTime } from '@/lib/dates'
 import type { DatedSession } from '@/types'
 import type { TranslationKey } from '@/i18n/translations'
@@ -43,14 +41,13 @@ const quickActions: {
 ]
 
 export function Home() {
-  const { t, tc, lang } = useLanguage()
+  const { t, tc } = useLanguage()
   const { member } = useAuth()
   const { next, upcoming } = useBooking()
   const navigate = useNavigate()
 
   const plan = planById(member.planId)
   const quote = quoteOfTheDay(new Date())
-  const nudge = nextBuddyClass()
 
   return (
     <motion.div
@@ -100,37 +97,6 @@ export function Home() {
           </button>
         )}
       </section>
-
-      {/* Social nudge — friends are booked, come along */}
-      {nudge && (
-        <motion.button
-          type="button"
-          onClick={() => navigate(`/class/${nudge.session.classId}`)}
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          whileTap={{ scale: 0.99 }}
-          className="tmk-card flex w-full items-center gap-3 p-4 text-left"
-        >
-          <AvatarStack members={nudge.buddies} max={3} size="sm" />
-          <div className="min-w-0 flex-1">
-            <p className="text-sm leading-snug text-secondary">
-              <span className="font-semibold">{nudge.buddies[0].firstName}</span>
-              {nudge.buddies.length > 1 && (
-                <> +{nudge.buddies.length - 1} {t('nudge.others')}</>
-              )}{' '}
-              {t(nudge.buddies.length > 1 ? 'nudge.goingMany' : 'nudge.goingOne')}{' '}
-              <span className="font-semibold">{tc(classById(nudge.session.classId).name)}</span>
-            </p>
-            <p className="text-xs capitalize text-slate-400">
-              {formatRelativeDay(new Date(nudge.session.date), lang)} ·{' '}
-              {formatTime(nudge.session.date, lang)}
-            </p>
-          </div>
-          <span className="shrink-0 rounded-lg bg-primary px-3 py-1.5 font-heading text-xs font-semibold uppercase tracking-wide text-white">
-            {t('nudge.join')}
-          </span>
-        </motion.button>
-      )}
 
       {/* Upcoming carousel */}
       {upcoming.length > 0 && (
